@@ -1,0 +1,37 @@
+# ---------------------------------------------------------------------------
+# NUNCA publicar datos personales.
+# La carpeta Personal/ del proyecto padre contiene CURP, credenciales INE,
+# kárdex y fotografías de decenas de personas identificadas. Este sitio se
+# publica en GitHub Pages: nada de eso puede salir del disco.
+# ---------------------------------------------------------------------------
+/Personal/
+Personal/
+**/File responses/
+**/*curp*
+**/*CURP*
+
+# Sistema
+.DS_Store
+Thumbs.db
+*~
+
+# Artefactos de trabajo
+node_modules/
+/tmp/
+*.log
+
+# Artefactos de la revisión de diseño (capturas pesadas, cachés, logs)
+.impeccable/review/
+.impeccable/hook.cache.json
+.impeccable/questions/
+
+# ---------------------------------------------------------------------------
+# Material de trabajo interno: NO se publica.
+# PRODUCT.md y la especificación contienen las correcciones al CV (incluida una
+# afirmación que no ocurrió) y la descripción de dónde viven datos personales
+# de terceros. Nada de eso debe ser legible desde internet.
+# Se quedan en el disco; si los quieres versionados, van en un repo privado.
+# ---------------------------------------------------------------------------
+PRODUCT.md
+docs/
+.impeccable/
