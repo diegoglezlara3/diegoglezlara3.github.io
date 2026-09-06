@@ -73,10 +73,12 @@ esa dirección dejó de funcionar y hay que republicarlo bajo el usuario nuevo. 
 sitios con dominio propio (institutokune.org, blog.institutokune.org) no se ven
 afectados.
 
-Este sitio vive en `diegoglezlara3/personal` y se publica en
-`diegoglezlara3.github.io/personal`. Todas las rutas del HTML son relativas, así que
-funciona igual en una subcarpeta que en la raíz; si algún día quieres la URL corta,
-basta con renombrar el repositorio a `diegoglezlara3.github.io`.
+Este sitio vive en el repositorio `diegoglezlara3/diegoglezlara3.github.io` y se
+publica en **https://diegoglezlara3.github.io**. Todas las rutas del HTML son
+relativas, así que también funcionaría desde una subcarpeta si algún día cambia.
+
+Los CV publicados **no llevan teléfono**: el repositorio es público y los PDF quedan
+indexables. Si regeneras los CV, no vuelvas a meter el número.
 
 ## Decisiones que no son accidentes
 
