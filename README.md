@@ -6,15 +6,19 @@ y se actualiza editando HTML a mano.
 ## Qué hay aquí
 
 ```
-index.html            La espina: posición, dos carriles, INGENIA, pilares,
-                      casos, trayectoria, lo que sigue sin resolver, contacto
-caso-minutas.html     Rediseño con DMAIC del proceso de minutas
+index.html            La espina: posición, pilares, portafolio (tarjetas +
+                      modal), experiencia, formación, el CTA de Garabato,
+                      contacto
 caso-lepp.html        El laboratorio construido desde cero (EMERGE va dentro)
 caso-garabato.html    La apuesta actual, sin tracción, buscando socios
 assets/styles.css     Todo el sistema visual
-assets/site.js        Dos cosas: el conmutador de idioma y los rieles
+assets/site.js        Dos cosas: idioma y los modales de ficha
 assets/*.pdf          CV en español y en inglés
 ```
+
+`caso-minutas.html` existió y se borró (2026-09-06): el rediseño DMAIC de minutas
+vive ahora sólo dentro de la entrada de Redwood en "Mi experiencia", no como caso
+propio.
 
 ## Cómo editar
 
@@ -40,20 +44,43 @@ color con `style="--kicker-color: var(--rojo)"` — los colores disponibles son 
 **Añadir una imagen.** Ponla en `assets/`, referénciala con `width` y `height` reales,
 y agrégale `loading="lazy"` si está por debajo del primer pantallazo.
 
+## El portafolio de proyectos
+
+Cada proyecto es una tarjeta compacta (`<button class="ficha-card" data-modal="…">`)
+que abre un `<dialog id="…">` con el detalle completo. Es `<dialog>` nativo, no una
+librería: el navegador resuelve solo el centrado, el fondo oscurecido (`::backdrop`),
+la tecla Esc y el regreso del foco al botón que abrió el modal. `site.js` sólo cablea
+tres cosas — el clic que abre (`showModal()`), el botón de cierre, y el clic en el
+fondo (el `<dialog>` nativo no se cierra solo al hacer clic fuera).
+
+**Para añadir un proyecto:** copia un `<button class="ficha-card">` y su `<dialog>`
+correspondiente, dales un `id`/`data-modal` nuevo y coordinado entre ambos, y
+registra el `<h3>` del modal con `aria-labelledby` apuntando a su propio `id`.
+
+**Por qué no son fichas completas en la página:** la primera versión mostraba todo el
+detalle directamente (sin modal) y la sección ocupaba un tercio de la página completa.
+El patrón tarjeta+modal resuelve eso sin perder ningún contenido.
+
+El botón de cierre (`.ficha-modal-cerrar`) es hijo directo del `<dialog>`, no del
+`<div class="ficha-modal-cuerpo">` que hace scroll — por eso se queda fijo en la
+esquina aunque el contenido sea más alto que el modal (como los 7 programas de LEPP
+en pantallas angostas). Si algún día lo mueves adentro del cuerpo, se irá con el
+scroll.
+
 ## Los rieles
 
-Los dos hairlines que recorren la página los dibuja `site.js` en un SVG que cubre toda
-la altura del documento. Convergen en un punto que se calcula a partir del bloque que
-lleva el atributo `data-union` — el de contacto. Si mueves ese bloque, los rieles lo
-siguen solos; un `ResizeObserver` los redibuja cuando cambia el alto de la página, ya
-sea por el idioma o por imágenes que cargan tarde.
+Dos hairlines verticales de 1px que marcan el margen de la columna de lectura. Es
+CSS puro (`.rieles::before`/`::after` en `assets/styles.css`) — sin SVG, sin JS, sin
+recompute. Su posición replica en `calc()` la misma matemática que `.envoltura` usa
+para centrarse (`max-width: 1180px` + `var(--marco)`), así que quedan siempre en el
+margen vacío y nunca sobre el contenido, en cualquier ancho.
 
-Dos cosas que romperían el efecto y conviene no tocar:
+Antes convergían en un punto animado sobre el bloque de contacto (el "estilo funnel").
+Se quitó a propósito (2026-09-07): son rectos, y punto.
 
-- `.rieles` está excluido a propósito de la regla `.pagina > :not(.rieles)`. Si esa
-  regla lo alcanza, le gana a su `position: absolute` y la capa colapsa.
-- El vértice cierra **arriba** del titular de contacto. Cerrarlo más abajo hace que las
-  diagonales crucen el texto, porque el bloque está centrado.
+Una cosa que conviene no tocar: `.rieles` está excluido de la regla
+`.pagina > :not(.rieles)`. Si esa regla lo alcanza, le gana a su `position: absolute`
+y la capa colapsa.
 
 ## Publicar
 
@@ -84,10 +111,17 @@ indexables. Si regeneras los CV, no vuelvas a meter el número.
 
 - **La foto va a color.** Rompe la Regla del Blanco y Negro del sistema Garabato a
   petición explícita de Diego.
-- **"Lo que sigue sin resolver"** nombra tres huecos abiertos. Es el diferenciador del
-  sitio, no un descuido.
-- **INGENIA es el único programa con caso propio.** Los demás reciben una línea
-  honesta: Diego da soporte, no forma parte de esos equipos.
+- **"Lo que sigue sin resolver" se convirtió en el CTA de Garabato** (2026-09-07):
+  "Un colectivo, no sólo un producto." Sigue siendo el mismo panel marino, y sigue
+  abriendo con una admisión honesta (una herramienta sola no basta), pero ahora es
+  una invitación a construir un colectivo de GovTech, no una lista de pendientes.
+  El ítem de ruido salió de aquí porque ya vive en su propia ficha del portafolio.
+- **El rediseño de minutas no tiene mención propia.** Vive únicamente dentro de la
+  experiencia en Redwood — decisión explícita de Diego, no un recorte de espacio.
+- **El portafolio son tarjetas, no páginas.** INGENIA, LEPP, el caso del ruido y
+  Garabato aparecen como tarjetas iguales que abren un modal; ninguno tiene trato
+  especial en la página principal, aunque LEPP y Garabato además tengan su propio
+  caso completo enlazado desde el modal.
 - **Sin blog, sin analítica, sin formulario.** El único objetivo es una conversación.
 
 El sistema visual completo está documentado en `DESIGN.md`. El contrato de dirección

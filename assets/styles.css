@@ -39,7 +39,6 @@
   /* Retícula y rieles */
   --medida: 68ch;
   --marco: clamp(1.25rem, 5vw, 4.5rem); /* margen exterior del contenido */
-  --riel-w: 2px;
   --paso: clamp(3.25rem, 6.5vw, 6rem); /* ritmo vertical entre secciones */
 
   /* La sombra es un sello, nunca un halo: cero blur. */
@@ -265,13 +264,14 @@ a:hover {
   color: var(--marino);
 }
 
-/* ---------- 4. Los rieles convergentes ----------------------------------- */
+/* ---------- 4. Los rieles ---------------------------------------------- */
 /*
-   Dos hairlines verticales recorren la página entera y se acercan conforme
-   bajas, hasta tocarse en el bloque de contacto. En escritorio el contenido
-   vive entre ellos en dos columnas; en teléfono el contenido colapsa a una
-   columna pero los rieles siguen en los márgenes y siguen convergiendo, así
-   que la metáfora sobrevive a todos los anchos.
+   Dos hairlines verticales, rectas, sin animación: marcan el margen de la
+   columna de lectura en todos los anchos. Ya no convergen ni se encienden
+   — es CSS puro, sin JS, así que funcionan incluso si el script no carga.
+   La posición replica en calc() la misma matemática que .envoltura usa
+   para centrarse (max-width 1180px + var(--marco)), para que el riel
+   quede siempre en el margen vacío y nunca sobre el contenido.
 */
 
 .rieles {
@@ -279,58 +279,24 @@ a:hover {
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  overflow: hidden;
 }
 
-.rieles svg {
-  width: 100%;
-  height: 100%;
-  display: block;
+.rieles::before,
+.rieles::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--tinta-15);
 }
 
-.riel-linea {
-  fill: none;
-  stroke: var(--tinta);
-  stroke-width: var(--riel-w);
-  vector-effect: non-scaling-stroke;
-  opacity: 0.28;
+.rieles::before {
+  left: max(8px, calc((100vw - 1180px) / 2 - 22px));
 }
 
-/* El remate: el último tramo de cada riel, en Azul Rey. Se dibuja solo
-   cuando el contacto entra en pantalla. Es el único momento animado de la
-   página, y coincide con su única conversión. */
-.riel-remate {
-  stroke: var(--azul);
-  opacity: 0;
-  transition: opacity 0.3s ease-out, stroke-dashoffset 1.1s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.riel-remate.encendido {
-  opacity: 1;
-}
-
-.riel-union {
-  fill: var(--azul);
-  stroke: var(--papel);
-  stroke-width: 3px;
-  opacity: 0;
-  transform-box: fill-box;
-  transform-origin: center;
-  transform: scale(0.2);
-  transition: opacity 0.35s ease-out 0.75s,
-    transform 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.75s;
-}
-
-.riel-union.encendido {
-  opacity: 1;
-  transform: scale(1);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .riel-remate,
-  .riel-union {
-    transition: none;
-  }
+.rieles::after {
+  right: max(8px, calc((100vw - 1180px) / 2 - 22px));
 }
 
 .pagina {
@@ -355,40 +321,6 @@ a:hover {
 
 section {
   padding-block: var(--paso);
-}
-
-/* Los dos carriles. En escritorio corren en paralelo. */
-.carriles {
-  display: grid;
-  gap: clamp(2.25rem, 4vw, 3.5rem);
-}
-
-@media (min-width: 62rem) {
-  .carriles {
-    grid-template-columns: 1fr 1fr;
-    gap: clamp(3rem, 5vw, 5rem);
-  }
-}
-
-/* Etiqueta de carril: en móvil es lo único que dice a qué vía pertenece un
-   bloque, así que nunca se oculta. */
-.carril-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-family: var(--mono);
-  font-weight: 500;
-  font-size: 0.6875rem;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--tinta-70);
-  margin-bottom: 1rem;
-}
-.carril-tag::before {
-  content: "";
-  width: 1.75rem;
-  height: 2px;
-  background: var(--carril-color, var(--tinta));
 }
 
 /* ---------- 6. Marco de tinta (todas las tarjetas) ----------------------- */
@@ -570,6 +502,10 @@ section {
   .portada-cuerpo {
     grid-template-columns: minmax(0, 1.55fr) minmax(0, 0.85fr);
     gap: clamp(2.5rem, 5vw, 4rem);
+    /* Sin párrafo de apoyo, el h1 puede ser más corto o más alto que la
+       foto según el idioma. Centrar evita que uno de los dos quede
+       colgando en el aire cuando no coinciden en altura. */
+    align-items: center;
   }
 }
 
@@ -685,35 +621,31 @@ section {
   background: var(--tinta);
 }
 
-/* ---------- 11. Trayectoria ----------------------------------------------- */
+/* ---------- 11. Registro (experiencia y formación) ------------------------ */
+/*
+   Ambas listas comparten el mismo renglón: fecha a la izquierda, y el cargo
+   o el detalle siempre a la derecha del nombre. La experiencia además es
+   plegable (un <details> por puesto); la formación es estática, sin
+   interacción — es la versión "sobria" del mismo patrón.
+*/
 
-.trayectoria {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 0;
+.registro {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: 100%;
+  text-align: left;
 }
 
-.trayectoria li {
-  display: grid;
-  gap: 0.35rem 1.75rem;
-  padding-block: 1.6rem;
-  border-top: 1px solid var(--tinta-15);
+.registro-principal {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.35rem 1.5rem;
 }
 
-.trayectoria li:last-child {
-  border-bottom: 1px solid var(--tinta-15);
-}
-
-@media (min-width: 48rem) {
-  .trayectoria li {
-    grid-template-columns: 11rem minmax(0, 1fr);
-    align-items: baseline;
-  }
-}
-
-.trayectoria .cuando {
+.registro-cuando {
   font-family: var(--mono);
   font-size: 0.75rem;
   letter-spacing: 0.14em;
@@ -722,81 +654,269 @@ section {
   font-variant-numeric: tabular-nums;
 }
 
-.trayectoria .que p {
-  margin: 0.4rem 0 0;
-  font-size: 1rem;
+.registro-org {
+  font-weight: 600;
+  font-size: 1.0625rem;
+  color: var(--tinta);
 }
 
-/* ---------- 12. Casos ------------------------------------------------------ */
+.registro-cargo {
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  color: var(--azul);
+  white-space: nowrap;
+}
 
-.casos {
+@media (min-width: 48rem) {
+  .registro {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 1.75rem;
+  }
+  .registro-cuando {
+    flex: 0 0 8rem;
+  }
+}
+
+/* Formación: la lista estática ------------------------------------------- */
+
+.formacion {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.formacion li {
+  padding-block: 1.5rem;
+  border-top: 1px solid var(--tinta-15);
+}
+
+.formacion li:last-child {
+  border-bottom: 1px solid var(--tinta-15);
+}
+
+/* Experiencia: la lista plegable ------------------------------------------ */
+
+.experiencia-item {
+  border-top: 1px solid var(--tinta-15);
+}
+
+.experiencia-item:last-of-type {
+  border-bottom: 1px solid var(--tinta-15);
+}
+
+.experiencia-resumen {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding-block: 1.5rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+/* Oculta el triángulo nativo de <summary>; el signo +/- lo dibuja
+   .experiencia-chevron. */
+.experiencia-resumen::-webkit-details-marker {
+  display: none;
+}
+
+.experiencia-resumen:hover .registro-org {
+  color: var(--azul);
+}
+
+.experiencia-chevron {
+  position: relative;
+  width: 0.9rem;
+  height: 0.9rem;
+  flex: none;
+}
+
+.experiencia-chevron::before,
+.experiencia-chevron::after {
+  content: "";
+  position: absolute;
+  background: var(--tinta);
+}
+
+.experiencia-chevron::before {
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  transform: translateY(-50%);
+}
+
+.experiencia-chevron::after {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+  transition: opacity 0.15s ease-out, transform 0.15s ease-out;
+}
+
+/* Abierto: la barra vertical desaparece y el "+" se vuelve "-". */
+details[open] > .experiencia-resumen .experiencia-chevron::after {
+  opacity: 0;
+  transform: translateX(-50%) scaleY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .experiencia-chevron::after {
+    transition: none;
+  }
+}
+
+.experiencia-cuerpo {
+  padding: 0 0 1.75rem;
+}
+
+@media (min-width: 48rem) {
+  .experiencia-cuerpo {
+    padding-left: calc(8rem + 1.75rem);
+  }
+}
+
+/* ---------- 12. Portafolio de proyectos ------------------------------------ */
+/*
+   Cada proyecto es una ficha: reutiliza el marco de tinta que antes era
+   exclusivo de INGENIA. Ahora es el tratamiento estándar de todo el
+   portafolio, INGENIA incluido — nada lleva trato especial.
+*/
+
+.portafolio {
   display: grid;
   gap: 1.5rem;
 }
 
-@media (min-width: 54rem) {
-  .casos {
-    grid-template-columns: repeat(3, 1fr);
+@media (min-width: 40rem) {
+  .portafolio {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
-.caso {
+/* La tarjeta es el botón que abre el modal: compacta a propósito, todo el
+   detalle vive en el <dialog>, no en la tarjeta. */
+.ficha-card {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
-  text-decoration: none;
+  align-items: flex-start;
+  gap: 0.6rem;
+  width: 100%;
+  text-align: left;
+  font: inherit;
   color: inherit;
   background: var(--papel-tarjeta);
   border: 2px solid var(--tinta);
   box-shadow: var(--sello);
-  padding: clamp(1.5rem, 2.5vw, 1.9rem);
+  padding: clamp(1.25rem, 2.5vw, 1.75rem);
+  cursor: pointer;
   transition: transform 0.14s ease-out, box-shadow 0.14s ease-out;
 }
 
-.caso:hover {
+.ficha-card:hover {
   transform: translate(-2px, -2px);
   box-shadow: 8px 8px 0 0 var(--tinta);
 }
 
-.caso:active {
+.ficha-card:active {
   transform: translate(1px, 1px);
   box-shadow: var(--sello-chico);
 }
 
-.caso h3 {
+.ficha-card h3 {
   color: var(--tinta);
 }
 
-.caso p {
+.ficha-teaser {
   font-size: 0.9375rem;
   margin: 0;
   color: var(--tinta-70);
 }
 
-.caso .ir {
-  margin-top: auto;
-  padding-top: 1rem;
+@media (prefers-reduced-motion: reduce) {
+  .ficha-card {
+    transition: none;
+  }
+  .ficha-card:hover {
+    transform: none;
+  }
+}
+
+/* El modal: <dialog> nativo. El navegador resuelve el centrado, el foco,
+   la tecla Esc y el fondo — sólo se le da la piel del sistema. */
+.ficha-modal {
+  width: min(94vw, 40rem);
+  max-height: min(86vh, 48rem);
+  padding: 0;
+  border: 2px solid var(--tinta);
+  box-shadow: var(--sello);
+  background: var(--papel-tarjeta);
+  color: var(--tinta);
+}
+
+.ficha-modal::backdrop {
+  background: rgba(23, 24, 28, 0.6);
+}
+
+.ficha-modal-cuerpo {
+  max-height: inherit;
+  overflow-y: auto;
+  padding: clamp(1.75rem, 4vw, 2.75rem);
+  /* Deja el hueco del botón de cierre libre en la esquina, aunque el
+     título envuelva varias líneas. */
+  padding-right: calc(clamp(1.75rem, 4vw, 2.75rem) + 2.75rem);
+}
+
+/* Hijo directo del <dialog>, fuera del cuerpo desplazable: se queda fijo
+   en la esquina sin importar cuánto se recorra el contenido. El <dialog>
+   ya es "position: fixed" por la hoja de estilos nativa del navegador
+   cuando está abierto, así que basta con posicionar contra él. */
+.ficha-modal-cerrar {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: var(--papel-tarjeta);
+  border: 2px solid var(--tinta);
+  font-family: var(--mono);
+  font-size: 1.375rem;
+  line-height: 1;
+  color: var(--tinta);
+  cursor: pointer;
+  z-index: 1;
+}
+
+.ficha-modal-cerrar:hover {
+  background: var(--tinta);
+  color: var(--papel);
+}
+
+/* Enlace de salida de una ficha hacia su caso completo. */
+.ir {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  margin-top: 1.5rem;
   font-family: var(--mono);
   font-size: 0.75rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--azul);
+  text-decoration: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
 }
 
-.caso:hover .ir {
+.ir:hover {
   color: var(--marino);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .caso {
-    transition: none;
-  }
-  .caso:hover {
-    transform: none;
-  }
 }
 
 /* ---------- 13. Lo que sigue sin resolver ---------------------------------- */
@@ -827,43 +947,6 @@ section {
 }
 
 .sin-resolver .mano {
-  color: var(--amarillo);
-}
-
-.huecos {
-  list-style: none;
-  margin: 2.25rem 0 0;
-  padding: 0;
-  display: grid;
-  gap: 0;
-}
-
-.huecos li {
-  padding-block: 1.5rem;
-  border-top: 1px solid rgba(241, 241, 237, 0.22);
-}
-
-.huecos li:last-child {
-  border-bottom: 1px solid rgba(241, 241, 237, 0.22);
-}
-
-.huecos h3 {
-  font-size: 1.0625rem;
-}
-
-.huecos p {
-  margin: 0.5rem 0 0;
-  font-size: 0.9375rem;
-}
-
-/* Qué haría falta: la línea que convierte el hueco en una pregunta abierta,
-   no en una disculpa. */
-.falta {
-  display: block;
-  margin-top: 0.75rem;
-  font-family: var(--mono);
-  font-size: 0.8125rem;
-  letter-spacing: 0.01em;
   color: var(--amarillo);
 }
 
