@@ -532,10 +532,12 @@ section {
   object-fit: cover;
   display: block;
   /* Encuadre cerrado sobre el rostro: es una página de credibilidad, no una
-     foto de la sala. */
-  object-position: 52% 24%;
-  transform: scale(1.18);
-  transform-origin: 52% 24%;
+     foto de la sala. Valores ajustados para el retrato formal (2026-09-11):
+     conserva el escudo de la UdeG y una pista de los objetos sobre la mesa
+     sin dejar espacio muerto arriba de la cabeza. */
+  object-position: 50% 22%;
+  transform: scale(1.28);
+  transform-origin: 50% 22%;
 }
 
 .retrato .amapola {
